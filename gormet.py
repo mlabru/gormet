@@ -32,16 +32,6 @@ import fl_data_redemet as rm
 import gm_db as db
 import gm_defs as gdf
 
-# < constants >--------------------------------------------------------------------------------
-
-# screen top left
-X1 = 450
-Y1 = 180
-
-# screen bottom right
-X2 = 1470
-Y2 = 610
-
 # < logging >----------------------------------------------------------------------------------
 
 # logger
@@ -81,7 +71,7 @@ def check_env():
 
     if not l_path.is_file():
         # create db
-        db.create_db()
+        db.create_db(gdf.DS_DB_FILE)
 
 # ---------------------------------------------------------------------------------------------
 def get_date() -> str:
@@ -114,14 +104,20 @@ def get_metar(fs_station: str, fs_date: str) -> str:
     return rm.redemet_get_location(fs_date[:-4], fs_station)
 
 # ---------------------------------------------------------------------------------------------
-def take_shot(fi_x1: int, fi_y1: int, fi_x2: int, fi_y2: int, fs_station: str, fs_date: str):
+def take_shot(fs_station: str, fs_date: str):
     """
     take a screenshot
 
     :returns: METAR or None
     """
+    # bounding box
+    li_x1 = gdf.DDCT_BBOX["sitwr-lab-01"][0]
+    li_y1 = gdf.DDCT_BBOX["sitwr-lab-01"][1]
+    li_x2 = gdf.DDCT_BBOX["sitwr-lab-01"][2]
+    li_y2 = gdf.DDCT_BBOX["sitwr-lab-01"][3]
+
     # grab part of the screen (X1, Y1, X2, Y2)
-    l_img = pyscreenshot.grab(bbox=(fi_x1, fi_y1, fi_x2, fi_y2))
+    l_img = pyscreenshot.grab(bbox=(li_x1, li_y1, li_x2, li_y2))
 
     # image filename
     ls_fname = f"./{gdf.DS_SSHOTS_DIR}/{fs_station}-{fs_date}Z.png"
@@ -132,7 +128,7 @@ def take_shot(fi_x1: int, fi_y1: int, fi_x2: int, fi_y2: int, fs_station: str, f
     # load image file
     l_img = cv2.imread(ls_fname, cv2.IMREAD_UNCHANGED)
 
-    # cropped_image = l_img[fi_y1:fi_y2, fi_x1:fi_x2]
+    # cropped_image = l_img[li_y1:li_y2, li_x1:li_x2]
     # cv2.imshow("cropped", cropped_image)
 
     # cv2.imshow("original", l_img)
@@ -167,7 +163,7 @@ def main():
     M_LOG.debug("metar: %s", str(lo_metar.s_metar_mesg))
 
     # take a screenshot
-    l_img = take_shot(X1, Y1, X2, Y2, l_args.code, ls_date)
+    l_img = take_shot(l_args.code, ls_date)
     assert l_img is not None
 
     # save to DB

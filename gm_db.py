@@ -86,7 +86,7 @@ def create_db(fs_db_file: str):
     :param fs_db_file: database file
     """
     # connect to SQLite
-    lconn = sql.connect(fs_db_file)
+    lconn = sqlite3.connect(fs_db_file)
 
     # create a cursor
     lcur = lconn.cursor()
