@@ -13,7 +13,7 @@ import sqlite3
 
 # local
 import fl_defs as df
-import gm_dirs as dr
+import gm_defs as gdf
 
 # < logging >----------------------------------------------------------------------------------
 
@@ -79,6 +79,42 @@ def create_connection(fs_file_db: str):
     return lconn
 
 # ---------------------------------------------------------------------------------------------
+def create_db(fs_db_file: str):
+    """ 
+    create a SQLite database
+
+    :param fs_db_file: database file
+    """
+    # connect to SQLite
+    lconn = sql.connect(fs_db_file)
+
+    # create a cursor
+    lcur = lconn.cursor()
+
+    # drop sshots table if already exsist
+    lcur.execute("DROP TABLE IF EXISTS sshots")
+
+    # create sshots table in gormet database
+    ls_sql ='''CREATE TABLE IF NOT EXISTS sshots (
+               station TEXT NOT NULL,
+               date    TEXT NOT NULL,
+               metar   TEXT,
+               image   BLOB,
+               PRIMARY KEY (station, date));'''
+
+    # execute query
+    lcur.execute(ls_sql)
+
+    # commit changes
+    lconn.commit()
+
+    # close cursor
+    lcur.close()
+
+    # close the connection
+    lconn.close()
+
+# ---------------------------------------------------------------------------------------------
 def create_table(f_conn, fs_create_table_sql: str):
     """ 
     create a table from the create_table_sql statement
@@ -117,7 +153,7 @@ def save2db(f_conn, fs_station: str, fs_date: str, fs_metar: str):
     assert lcur
 
     # filename
-    ls_fname = f"./{dr.DS_SSHOTS_DIR}/{fs_station}-{fs_date}Z.png"
+    ls_fname = f"./{gdf.DS_SSHOTS_DIR}/{fs_station}-{fs_date}Z.png"
 
     # build query
     ls_sql = "INSERT INTO sshots (station, date, metar, image) VALUES (?, ?, ?, ?);"

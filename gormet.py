@@ -11,7 +11,7 @@ import argparse
 import datetime
 #import glob
 import logging
-#import pathlib
+import pathlib
 import sqlite3
 import sys
 #import threading
@@ -29,8 +29,8 @@ import pyscreenshot
 #import fl_defs as df
 import fl_data_redemet as rm
 
-import gm_dirs as dr
 import gm_db as db
+import gm_defs as gdf
 
 # < constants >--------------------------------------------------------------------------------
 
@@ -67,6 +67,21 @@ def arg_parse():
 
     # return arguments
     return l_parser.parse_args()
+
+# ---------------------------------------------------------------------------------------------
+def check_env():
+    """
+    check if environment dependencies are fulfilled
+    """
+    # if screenshots dir doesn’t exist, create a new path
+    pathlib.Path(gdf.DS_SSHOTS_DIR).mkdir(parents=True, exist_ok=True)
+
+    # path to database
+    l_path = pathlib.Path(gdf.DS_DB_FILE)
+
+    if not l_path.is_file():
+        # create db
+        db.create_db()
 
 # ---------------------------------------------------------------------------------------------
 def get_date() -> str:
@@ -108,8 +123,8 @@ def take_shot(fi_x1: int, fi_y1: int, fi_x2: int, fi_y2: int, fs_station: str, f
     # grab part of the screen (X1, Y1, X2, Y2)
     l_img = pyscreenshot.grab(bbox=(fi_x1, fi_y1, fi_x2, fi_y2))
 
-    # filename
-    ls_fname = f"./{dr.DS_SSHOTS_DIR}/{fs_station}-{fs_date}Z.png"
+    # image filename
+    ls_fname = f"./{gdf.DS_SSHOTS_DIR}/{fs_station}-{fs_date}Z.png"
 
     # save image file
     l_img.save(ls_fname)
@@ -134,8 +149,11 @@ def main():
     # get program arguments
     l_args = arg_parse()
 
+    # check environment
+    check_env()
+
     # connect to the database
-    lconn = db.create_connection(f"./{dr.DS_SSHOTS_DIR}/gormet.db")
+    lconn = db.create_connection(gdf.DS_DB_FILE)
     assert lconn
 
     # time delta
