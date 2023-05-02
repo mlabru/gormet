@@ -12,6 +12,7 @@ import datetime
 #import glob
 import logging
 import pathlib
+import socket
 import sqlite3
 import sys
 #import threading
@@ -108,13 +109,16 @@ def take_shot(fs_station: str, fs_date: str):
     """
     take a screenshot
 
-    :returns: METAR or None
+    :returns: screenshot image
     """
+    # system hostname
+    ls_hostname = socket.gethostname()
+
     # bounding box
-    li_x1 = gdf.DDCT_BBOX["sitwr-lab-01"][0]
-    li_y1 = gdf.DDCT_BBOX["sitwr-lab-01"][1]
-    li_x2 = gdf.DDCT_BBOX["sitwr-lab-01"][2]
-    li_y2 = gdf.DDCT_BBOX["sitwr-lab-01"][3]
+    li_x1 = gdf.DDCT_BBOX[ls_hostname][0]
+    li_y1 = gdf.DDCT_BBOX[ls_hostname][1]
+    li_x2 = gdf.DDCT_BBOX[ls_hostname][2]
+    li_y2 = gdf.DDCT_BBOX[ls_hostname][3]
 
     # grab part of the screen (X1, Y1, X2, Y2)
     l_img = pyscreenshot.grab(bbox=(li_x1, li_y1, li_x2, li_y2))
