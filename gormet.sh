@@ -3,6 +3,8 @@
 # language
 # export LANGUAGE=pt_BR
 
+echo ">>>>>>>>  ${USER}  <<<<<<<<<<<<<<<<"
+
 # gormet directory
 GORMET=~/Public/gormet
 
@@ -39,7 +41,7 @@ fi
 # set PYTHONPATH
 export PYTHONPATH="$PWD/."
 # executa o loader
-poetry run python3 gormet.py $@ >> $LOGF 2>&1
+~/.poetry/bin/poetry run python3 gormet.py $@ >> $LOGF 2>&1
 
 # logger
 echo "Fim de processamento: " $(date '+%Y-%m-%d %H:%M') >> $LOGF

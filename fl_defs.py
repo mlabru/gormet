@@ -13,8 +13,7 @@ import logging
 # < defines >----------------------------------------------------------------------------------
 
 # logging level
-# DI_LOG_LEVEL = logging.WARNING
-DI_LOG_LEVEL = logging.DEBUG
+DI_LOG_LEVEL = logging.WARNING
 
 # GMT is ahead of us
 DI_DIFF_GMT = 3
