@@ -37,7 +37,7 @@ D_VID_EXT = "avi"
 D_CODE = "SBGR"
 
 # default FPS
-D_FPS = 24.0
+D_FPS = 12
 
 # photo interval (min)
 D_PHOTO = 3
@@ -75,11 +75,10 @@ def arg_parse():
     assert l_parser
 
     # args
-    l_parser.add_argument("url", help="URL stream source.")
     l_parser.add_argument("-c", "--code", help=f"ICAO code. [{D_CODE}]",
                           default=D_CODE, dest="code", action="store")
     l_parser.add_argument("-f", "--fps", help=f"play back FPS for opencv. [{D_FPS}]",
-                          default=D_FPS, type=float)
+                          default=D_FPS, type=int)
     l_parser.add_argument("-m", "--model", help=f"path to Caffe pre-trained model. [{D_MODEL}]",
                           default=D_MODEL)
     l_parser.add_argument("-p", "--prototxt", help=f"path to Caffe prototxt file. [{D_PROTO}]",
@@ -91,11 +90,13 @@ def arg_parse():
     l_parser.add_argument("-w", "--probability", 
                           help=f"minimum probability to filter weak detections. [{D_PROB}]",
                           default=D_PROB, dest="prob", type=float)
+    l_parser.add_argument("url", help="URL stream source.")
+
     # return arguments
     return l_parser.parse_args()
 
 # ---------------------------------------------------------------------------------------------
-def create_video_out(fs_code: str, ff_fps: float, ft_vsize: tuple):
+def create_video_out(fs_code: str, fi_fps: int, ft_vsize: tuple):
     """
     define the codec and create VideoWriter object. The output is stored in an avi file.
 
@@ -109,7 +110,7 @@ def create_video_out(fs_code: str, ff_fps: float, ft_vsize: tuple):
     ls_vname = f"./{df.DS_DIR_GORFOG}/{fs_code}-{ls_date}Zv.{D_VID_EXT}"
 
     # return new output video
-    return cv2.VideoWriter(ls_vname, D_FOURCC, ff_fps, ft_vsize)
+    return cv2.VideoWriter(ls_vname, D_FOURCC, fi_fps, ft_vsize)
 
 # ---------------------------------------------------------------------------------------------
 def stream_to_url(fs_url: str, fs_quality: str="best"):
@@ -190,7 +191,7 @@ def main():
     li_frame_height = int(l_cap.get(4))
 
     # time of each frame in ms
-    li_frame_time = int((1.0 / l_args.fps) * 1000.0)
+    lf_frame_time = 1. / l_args.fps
 
     # create VideoWriter object
     l_vid = create_video_out(l_args.code, l_args.fps, (li_frame_width, li_frame_height))
@@ -213,10 +214,10 @@ def main():
                 break
 
             # save frame
-            l_vid.write(l_frame)
+            # l_vid.write(l_frame)
 
             # show image
-            cv2.imshow("video", l_frame)
+            # cv2.imshow("live", l_frame)
 
             # detect airplanes in frame
             ia.detect(l_model, l_args.prob, l_frame)
@@ -242,7 +243,7 @@ def main():
                 lf_elapsed_photo = 0.
 
             # wait
-            if cv2.waitKey(li_frame_time) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == ord('q'):
                 # quit
                 break
 
@@ -259,6 +260,16 @@ def main():
         # increment video elapsed time
         lf_elapsed_video += lf_dt        
 
+        # está adiantado ?
+        if lf_frame_time > lf_dt:
+            # info
+            print(">>>>>>>>>>>>>", lf_frame_time - lf_dt)
+            # permite o scheduler
+            time.sleep(lf_frame_time - lf_dt)
+        else:
+            # info
+            print(lf_dt - lf_frame_time, "<<<<<<<<<<<<<")
+
     # close windows
     cv2.destroyAllWindows()
 
@@ -267,6 +278,9 @@ def main():
 
     # release video output
     l_vid.release()
+
+    # info
+    print("Quiting...")
 
 # ---------------------------------------------------------------------------------------------
 # this is the bootstrap process

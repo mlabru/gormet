@@ -12,7 +12,7 @@ import logging
 # < constants >--------------------------------------------------------------------------------
 
 # logging level
-DI_LOG_LEVEL = logging.WARNING
+DI_LOG_LEVEL = logging.DEBUG
 
 # bounding boxes (X1, Y1, X2, Y2)
 DDCT_BBOX_GORFOG = {"einstein": (450, 180, 1470, 610),
@@ -25,12 +25,13 @@ DDCT_BBOX_GORMET = {"einstein": (450, 180, 1470, 610),
                     "zeus": (1528, 515, 2558, 940)}
 
 # screenshots dir
-DS_DIR_GORMET = "sshots/met"
-DS_DIR_GORFOG = "sshots/fog"
-
+DS_DIR_SHOTS = "./shots/{}/{}/"
+# METAR dir
+DS_DIR_METAR = "./metar/{}/{}/"
+"""
 # db filename
-DS_DB_GORFOG = f"./{DS_DIR_GORFOG}/gorfog.db"
-DS_DB_GORMET = f"./{DS_DIR_GORMET}/gormet.db"
+DS_DB_GORFOG = f"{DS_DIR_GORFOG}/gorfog.db"
+DS_DB_GORMET = f"{DS_DIR_GORMET}/gormet.db"
 
 # create sshots table in gorfog database
 DS_SQL_GORFOG ='''CREATE TABLE IF NOT EXISTS sshots (
@@ -46,7 +47,7 @@ DS_SQL_GORMET ='''CREATE TABLE IF NOT EXISTS sshots (
                   metar   TEXT,
                   image   BLOB,
                   PRIMARY KEY (station, date));'''
-
+"""
 # < constants >--------------------------------------------------------------------------------
 
 # screen top left

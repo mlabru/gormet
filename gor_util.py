@@ -52,23 +52,36 @@ def arg_parse(fs_sysname: str):
     return l_parser.parse_args()
 
 # ---------------------------------------------------------------------------------------------
-def check_env(fs_path: str, fs_dbname: str, fs_sql: str) -> None:
+def check_db(fs_db: str, fs_sql: str) -> None:
     """
     check if environment dependencies are fulfilled
 
-    :param fs_path: sys path
-    :param fs_dbname: db path name
+    :param fs_db: db path name
     :param fs_sql: create table stmt
     """
-    # if screenshots dir doesn’t exist, create a new path
-    pathlib.Path(fs_path).mkdir(parents=True, exist_ok=True)
-
     # path to database
-    l_path = pathlib.Path(fs_dbname)
+    l_path = pathlib.Path(fs_db)
 
     if not l_path.is_file():
         # create db
-        db.create_db(fs_dbname, fs_sql)
+        db.create_db(fs_db, fs_sql)
+
+# ---------------------------------------------------------------------------------------------
+def check_env(flst_paths: list, fs_db: str = "", fs_sql: str = "", fv_db: bool = False) -> None:
+    """
+    check if environment dependencies are fulfilled
+
+    :param flst_paths: paths list
+    :param fs_db: db path name
+    :param fs_sql: create table stmt
+    """
+    for ls_path in flst_paths:
+        # if dir doesn’t exist, create a new path
+        pathlib.Path(ls_path).mkdir(parents=True, exist_ok=True)
+
+    if fv_db:
+        # create db
+        check_db(fs_db, fs_sql)
 
 # ---------------------------------------------------------------------------------------------
 def convert2binary(fs_fname: str):
