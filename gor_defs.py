@@ -8,6 +8,18 @@ gor_defs
 
 # python library
 import logging
+import os
+
+# < environment >------------------------------------------------------------------------------
+
+# dotenv
+import dotenv
+
+# take environment variables from .env
+dotenv.load_dotenv()
+
+# Youtube stream API key
+DS_STREAM = os.getenv("DS_STREAM")
 
 # < constants >--------------------------------------------------------------------------------
 
@@ -25,9 +37,9 @@ DDCT_BBOX_GORMET = {"einstein": (450, 180, 1470, 610),
                     "zeus": (1528, 515, 2558, 940)}
 
 # screenshots dir
-DS_DIR_SHOTS = "./shots/{}/{}/"
+DS_DIR_SHOTS = "./data/shots/{}/{}/"
 # METAR dir
-DS_DIR_METAR = "./metar/{}/{}/"
+DS_DIR_METAR = "./data/metar/{}/{}/"
 """
 # db filename
 DS_DB_GORFOG = f"{DS_DIR_GORFOG}/gorfog.db"
@@ -51,11 +63,11 @@ DS_SQL_GORMET ='''CREATE TABLE IF NOT EXISTS sshots (
 # < constants >--------------------------------------------------------------------------------
 
 # screen top left
-X1 = 450
-Y1 = 180
+X1 = 277
+Y1 = 0
 
 # screen bottom right
-X2 = 1470
-Y2 = 610
+X2 = 1697
+Y2 = 1000
 
 # < the end >----------------------------------------------------------------------------------

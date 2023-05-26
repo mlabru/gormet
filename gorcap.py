@@ -32,9 +32,6 @@ D_CODE = "SBGR"
 # photo interval (min)
 D_PHOTO = 1
 
-# default source stream
-D_STREAM = "https://www.youtube.com/watch?v=EvtTtlLInzY&ab_channel=GolfOscarRomeo"
-
 # stream quality
 D_QUALY = "best"
 
@@ -115,7 +112,7 @@ def take_photo(fs_code: str, f_frame):
         ls_fname = df.DS_DIR_SHOTS.format("cap", fs_code) + f"{ls_date}Zc.png"
 
         # crop image
-        l_crop_image = f_frame[0:1000, 277:1697]
+        l_crop_image = f_frame[df.Y1:df.Y2, df.X1:df.X2]
 
         # saving the image
         cv2.imwrite(ls_fname, l_crop_image)
@@ -170,6 +167,7 @@ def main():
         lf_ini = time.perf_counter()
 
         try:
+            # capture frame
             l_ret, l_frame = l_cap.read()
 
             if not l_ret:

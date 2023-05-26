@@ -3,7 +3,9 @@
 .bkp/
 .hidden/
 .tst/
-sshots/
+data/
+shots/
+metar/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
