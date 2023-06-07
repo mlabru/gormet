@@ -25,7 +25,23 @@ import skimage.feature as skf
 
 # logger
 M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+M_LOG.setLevel(logging.WARNING)
+
+# ---------------------------------------------------------------------------------------------
+def analise_textura(f_image) -> int:
+    """
+    técnica de analise de textura para detecção de nevoeiro
+
+    :param fs_image_path: path da imagem a analisar
+    :param fi_threshold: limite que define o nível de sensibilidade da detecção
+
+    :returns: True indica que o nevoeiro foi detectado. False, senão.
+    """
+    # logger
+    M_LOG.info(">> analise_textura")
+
+    # retorna se o contraste está abaixo do limiar
+    return calculate_contrast(f_image)
 
 # ---------------------------------------------------------------------------------------------
 def calculate_contrast(f_image):
@@ -45,11 +61,11 @@ def calculate_contrast(f_image):
     # Calcular a matriz de coocorrência de níveis de cinza
     l_glcm = skf.graycomatrix(l_gray, [1], [0], symmetric=True, normed=True)
 
-    # Calcular o contraste a partir da matriz de coocorrência
+    # retorna o contraste a partir da matriz de coocorrência
     return skf.graycoprops(l_glcm, 'contrast')[0, 0]
 
 # ---------------------------------------------------------------------------------------------
-def analise_textura(fs_image_path: str, fi_threshold: int = 500) -> bool:
+def do_analise_textura(fs_image_path: str, fi_threshold: int = 500) -> bool:
     """
     técnica de analise de textura para detecção de nevoeiro
 
@@ -59,15 +75,12 @@ def analise_textura(fs_image_path: str, fi_threshold: int = 500) -> bool:
     :returns: True indica que o nevoeiro foi detectado. False, senão.
     """
     # logger
-    M_LOG.info(">> analise_textura")
+    M_LOG.info(">> do_analise_textura")
 
     # carrega a imagem
     l_image = cv2.imread(fs_image_path)
     
-    # calcula o contraste
-    li_contrast = calculate_contrast(l_image)
-    
     # retorna se o contraste está abaixo do limiar
-    return li_contrast < fi_threshold
+    return calculate_contrast(l_image) < fi_threshold
 
 # < the end >----------------------------------------------------------------------------------

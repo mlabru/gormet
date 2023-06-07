@@ -26,10 +26,32 @@ import cv2
 
 # logger
 M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+M_LOG.setLevel(logging.WARNING)
 
 # ---------------------------------------------------------------------------------------------
-def analise_contraste(fs_image_path: str, ff_threshold: float = 0.1) -> bool:
+def analise_contraste(f_image) -> float:
+    """ 
+    técnica de analise de contraste para detecção de nevoeiro
+    
+    :param fs_image_path: path da imagem a analisar
+    :param ff_threshold: limite que define o nível de sensibilidade da detecção
+
+    :returns: True indica que o nevoeiro foi detectado. False, senão.
+    """
+    # logger
+    M_LOG.info(">> analise_contraste") 
+
+    # converte a imagem para escala de cinza
+    l_gray = cv2.cvtColor(f_image, cv2.COLOR_BGR2GRAY)
+
+    # calcula o desvio padrão da imagem em escala de cinza
+    l_std_dev = np.std(l_gray)
+
+    # retorna o desvio padrão médio da imagem (contraste médio)
+    return np.mean(l_std_dev)
+
+# ---------------------------------------------------------------------------------------------
+def do_analise_contraste(fs_image_path: str, ff_threshold: float = 0.1) -> bool:
     """ 
     técnica de analise de contraste para detecção de nevoeiro
     
@@ -44,16 +66,7 @@ def analise_contraste(fs_image_path: str, ff_threshold: float = 0.1) -> bool:
     # carrega a imagem
     l_image = cv2.imread(fs_image_path)
 
-    # converte a imagem para escala de cinza
-    l_gray = cv2.cvtColor(l_image, cv2.COLOR_BGR2GRAY)
-
-    # calcula o desvio padrão da imagem em escala de cinza
-    l_std_dev = np.std(l_gray)
-
-    # calcula o desvio padrão médio da imagem (contraste médio)
-    lf_mean_std_dev = np.mean(l_std_dev)
-
     # retorna se o desvio padrão médio está abaixo do limite (i.e. nevoeiro detectado)
-    return lf_mean_std_dev < ff_threshold
+    return analise_contraste(l_image) < ff_threshold
 
 # < the end >----------------------------------------------------------------------------------

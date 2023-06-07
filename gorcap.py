@@ -147,6 +147,11 @@ def main():
     # time delta
     ldt_1hour = datetime.timedelta(hours=1)
 
+    # ...eita preguiça...
+    if "x" == l_args.url:
+        # default stream
+        l_args.url = df.DS_STREAM
+
     # stream to load
     ls_stream_url = stream_to_url(l_args.url, l_args.quality)
 

@@ -27,10 +27,10 @@ import cv2
 
 # logger
 M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+M_LOG.setLevel(logging.WARNING)
 
 # ---------------------------------------------------------------------------------------------
-def filtro_alta_frequencia(fs_image_path: str, fi_threshold: int = 50) -> bool:
+def filtro_alta_frequencia(f_image, fi_threshold: int = 50) -> float:
     """ 
     técnica de filtro de alta frequência
     
@@ -42,11 +42,8 @@ def filtro_alta_frequencia(fs_image_path: str, fi_threshold: int = 50) -> bool:
     # logger
     M_LOG.info(">> filtro_alta_frequencia")
 
-    # carrega a imagem
-    l_image = cv2.imread(fs_image_path)
-
     # converte a imagem para escala de cinza
-    l_gray = cv2.cvtColor(l_image, cv2.COLOR_BGR2GRAY)
+    l_gray = cv2.cvtColor(f_image, cv2.COLOR_BGR2GRAY)
 
     # aplica filtro de média para suavizar a imagem
     l_blurred = cv2.blur(l_gray, (5, 5))
@@ -62,9 +59,27 @@ def filtro_alta_frequencia(fs_image_path: str, fi_threshold: int = 50) -> bool:
 
     # calcula a porcentagem de pixels brancos em relação ao total
     l_height, l_width = l_binary.shape[:2]
-    l_percentage = (l_num_white_pixels / (l_height * l_width)) * 100
+    
+    # retorna a porcentagem de pixels desfocados
+    return (l_num_white_pixels / (l_height * l_width)) * 100
+
+# ---------------------------------------------------------------------------------------------
+def do_filtro_alta_frequencia(fs_image_path: str, fi_threshold: int = 50) -> bool:
+    """ 
+    técnica de filtro de alta frequência
+    
+    :param fs_image_path: path da imagem a analisar
+    :param fi_threshold: limite que define o nível de sensibilidade da detecção
+
+    :returns: True indica que o nevoeiro foi detectado. False, senão.
+    """ 
+    # logger
+    M_LOG.info(">> do_filtro_alta_frequencia")
+
+    # carrega a imagem
+    l_image = cv2.imread(fs_image_path)
 
     # retorna se a porcentagem de pixels desfocados está acima do limite (i.e. nevoeiro detectado)
-    return l_percentage > fi_threshold
+    return filtro_alta_frequencia(l_image) > fi_threshold
 
 # < the end >----------------------------------------------------------------------------------

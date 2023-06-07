@@ -27,10 +27,10 @@ import cv2
 
 # logger
 M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+M_LOG.setLevel(logging.WARNING)
 
 # ---------------------------------------------------------------------------------------------
-def filtro_contraste(fs_image_path: str, fi_threshold: int = 30) -> bool:
+def filtro_contraste(f_image) -> float:
     """ 
     filtro baseado na diferença de contraste entre regiões para detecção de nevoeiro em
     uma imagem
@@ -43,22 +43,37 @@ def filtro_contraste(fs_image_path: str, fi_threshold: int = 30) -> bool:
     # logger
     M_LOG.info(">> filtro_contraste")
 
-    # carrega a imagem
-    l_image = cv2.imread(fs_image_path)
-
     # converte a imagem para escala de cinza
-    l_gray = cv2.cvtColor(l_image, cv2.COLOR_BGR2GRAY)
+    l_gray = cv2.cvtColor(f_image, cv2.COLOR_BGR2GRAY)
 
     # calcula o contraste local usando o filtro de Sobel
     l_grad_x = cv2.Sobel(l_gray, cv2.CV_64F, 1, 0, ksize=3)
     l_grad_y = cv2.Sobel(l_gray, cv2.CV_64F, 0, 1, ksize=3)
 
+    # calcula o contraste local  
     l_local_contrast = np.sqrt(l_grad_x ** 2 + l_grad_y ** 2)
 
-    # calcula a média do contraste local
-    l_mean_contrast = np.mean(l_local_contrast)
+    # retorna a média do contraste local
+    return np.mean(l_local_contrast)
+
+# ---------------------------------------------------------------------------------------------
+def do_filtro_contraste(fs_image_path: str, fi_threshold: int = 30) -> bool:
+    """ 
+    filtro baseado na diferença de contraste entre regiões para detecção de nevoeiro em
+    uma imagem
+
+    :param fs_image_path: path da imagem a analisar
+    :param fi_threshold: limite que define o nível de sensibilidade da detecção
+
+    :returns: True indica que o nevoeiro foi detectado. False, senão.
+    """
+    # logger
+    M_LOG.info(">> do_filtro_contraste")
+
+    # carrega a imagem
+    l_image = cv2.imread(fs_image_path)
 
     # retorna se a média do contraste está abaixo do limite (i.e. nevoeiro detectado)
-    return l_mean_contrast < fi_threshold
+    return filtro_contraste(l_image) < fi_threshold
 
 # < the end >----------------------------------------------------------------------------------

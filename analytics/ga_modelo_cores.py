@@ -25,10 +25,10 @@ import cv2
 
 # logger
 M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(logging.DEBUG)
+M_LOG.setLevel(logging.WARNING)
 
 # ---------------------------------------------------------------------------------------------
-def modelo_cores(fs_image_path: str, ff_threshold: float = 0.1):
+def modelo_cores(f_image) -> float:
     """
     técnica de modelo de cores
 
@@ -40,19 +40,32 @@ def modelo_cores(fs_image_path: str, ff_threshold: float = 0.1):
     # logger
     M_LOG.info(">> modelo_cores")
 
-    # carrega a imagem
-    l_image = cv2.imread(fs_image_path)
-
     # converte a imagem para o espaço de cores HSV
-    l_hsv = cv2.cvtColor(l_image, cv2.COLOR_BGR2HSV)
+    l_hsv = cv2.cvtColor(f_image, cv2.COLOR_BGR2HSV)
 
     # extrai o canal de matiz (H) da imagem HSV
     l_hue_channel = l_hsv[:, :, 0]
 
-    # calcula o desvio padrão do canal de matiz
-    l_std_dev = np.std(l_hue_channel)
+    # retorna o desvio padrão do canal de matiz
+    return np.std(l_hue_channel)
+
+# ---------------------------------------------------------------------------------------------
+def do_modelo_cores(fs_image_path: str, ff_threshold: float = 0.1):
+    """
+    técnica de modelo de cores
+
+    :param fs_image_path: path da imagem a analisar
+    :param ff_threshold: limite que define o nível de sensibilidade da detecção
+
+    :returns: True indica que o nevoeiro foi detectado. False, senão.
+    """
+    # logger
+    M_LOG.info(">> do_modelo_cores")
+
+    # carrega a imagem
+    l_image = cv2.imread(fs_image_path)
 
     # retorna se o desvio padrão está abaixo do limite (i.e. nevoeiro detectado)
-    return l_std_dev < ff_threshold
+    return modelo_cores(l_image) < ff_threshold
 
 # < the end >----------------------------------------------------------------------------------

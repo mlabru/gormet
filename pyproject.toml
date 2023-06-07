@@ -17,6 +17,10 @@ webdriver-manager = "^3.8.6"
 streamlink = "^5.4.0"
 imutils = "^0.5.4"
 numpy = "^1.24.3"
+scikit-image = "^0.21.0"
+pandas = "^2.0.2"
+matplotlib = "^3.7.1"
+scikit-learn = "^1.2.2"
 
 [tool.poetry.dev-dependencies]
 
