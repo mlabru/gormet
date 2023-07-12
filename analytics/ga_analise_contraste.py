@@ -3,12 +3,12 @@
 ga_analise_contraste
 
 uma imagem é carregada, convertida para escala de cinza e, em seguida, é calculado o
-desvio padrão da imagem em escala de cinza.  O desvio padrão médio é obtido calculando
-a média dos desvios padrão de cada pixel da imagem.  Em seguida, com base no desvio
-padrão médio, é feita uma comparação com o limite (threshold) que define o nível de
-sensibilidade na detecção de nevoeiro.  Se o desvio padrão médio estiver abaixo do
-limite, o programa indica que o nevoeiro foi detectado.  Pode-se ajustar o limite
-(threshold) de acordo com a sensibilidade desejada.
+desvio padrão da imagem.  O desvio padrão médio é obtido calculando a média dos desvios
+padrão de cada pixel da imagem.  Em seguida, com base neste desvio padrão médio, é
+feita uma comparação com o limite (threshold) que define o nível de sensibilidade na
+detecção de nevoeiro.  Se o desvio padrão médio estiver abaixo do limite, o programa
+indica que o nevoeiro foi detectado.  Pode-se ajustar o limite (threshold) de acordo
+com a sensibilidade desejada.
 
 2023.may  mlabru  initial version (Linux/Python)
 """

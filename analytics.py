@@ -7,7 +7,7 @@ analytics
 # < imports >----------------------------------------------------------------------------------
 
 # python library
-import csv  
+import csv
 import logging
 import os
 import sys
@@ -26,40 +26,59 @@ import analytics.ga_modelo_cores as mc
 import gor_defs as df
 import fl_metar_parser as mp
 
+# < constants >--------------------------------------------------------------------------------
+
+# diretório contendo as imagens
+DS_DIR_IMG = "data/shots/cap/SBGR-28/"
+DS_DIR_MET = "data/metar/cap/SBGR-28/"
+
 # < logging >----------------------------------------------------------------------------------
 
 # logger
 M_LOG = logging.getLogger(__name__)
-M_LOG.setLevel(df.DI_LOG_LEVEL)
+M_LOG.setLevel(logging.DEBUG)
 
 # ---------------------------------------------------------------------------------------------
-def do_analytics(f_image):
+def do_analytics(fs_image_path: str):
     """
     do analytics
     """
     # logger
     M_LOG.info(">> do_analytics")
 
-    # faz detecção por análise de contraste
-    lf_mean_std_dev = ac.analise_contraste(f_image)
-
-    # faz detecção por modelo de cores
-    lf_std_dev = mc.modelo_cores(f_image)
-
-    # faz detecção por analise de textura
-    li_contrast = at.analise_textura(f_image)
+    # carrega a imagem
+    l_image = cv2.imread(fs_image_path)
 
     # faz detecção por filtro de alta frequência
-    lf_percentage = faf.filtro_alta_frequencia(f_image)
+    # lf_percentage = faf.filtro_alta_frequencia(l_image)
+    # save image
+    # make_link(fs_image_path, "alta_frequencia", f'{lf_percentage:08.5f}')
+
+    # faz detecção por análise de contraste
+    lf_mean_std_dev = ac.analise_contraste(l_image)
+    # save image
+    make_link(fs_image_path, "analise_contraste", f'{lf_mean_std_dev:08.5f}')
+
+    # faz detecção por modelo de cores
+    lf_std_dev = mc.modelo_cores(l_image)
+    # save image
+    make_link(fs_image_path, "modelo_cores", f'{lf_std_dev:08.5f}')
+
+    # faz detecção por análise de textura
+    lf_contrast = at.analise_textura(l_image)
+    # save image
+    make_link(fs_image_path, "analise_textura", f'{lf_contrast:08.5f}')
 
     # faz detecção por filtro de contraste
-    lf_mean_contrast = fc.filtro_contraste(f_image)
+    lf_mean_contrast = fc.filtro_contraste(l_image)
+    # save image
+    make_link(fs_image_path, "filtro_contraste", f'{lf_mean_contrast:08.5f}')
 
-    # return results
-    return [lf_mean_std_dev, lf_std_dev, li_contrast, lf_percentage, lf_mean_contrast]
+    # retorna o resultado para posterior análise estatística
+    return [lf_mean_std_dev, lf_std_dev, lf_contrast, lf_mean_contrast]
 
 # ---------------------------------------------------------------------------------------------
-def do_metar_process(fs_filename: str):
+def do_metar_process(fs_filename: str, fi_ndx: int):
     """
     process metar
     """
@@ -73,20 +92,38 @@ def do_metar_process(fs_filename: str):
 
         # parse METAR
         l_metar = mp.metar_parse(ls_line)
-        
+
+    # visibility from METAR
+    li_visibility = l_metar.i_visibility if l_metar.i_visibility is not None else 20000
+    
+    # save image
+    make_link(fs_filename, "visibilidade", f'{li_visibility:05d}_{fi_ndx:03d}')
+
     # return visibility
-    return [l_metar.i_visibility if l_metar.i_visibility is not None else 20000]
+    return [li_visibility]
 
 # ---------------------------------------------------------------------------------------------
-def process_image(l_image):
+def make_link(fs_src, fs_dir: str, fs_result: str):
     """
-    process image
+    write image
     """
-    # aplica a função à imagem
-    lt_result = sua_funcao(l_image)
+    # caminho da imagem
+    ls_src = os.path.join("..", os.path.basename(fs_src))
 
-    # retorna o resultado para posterior análise estatística
-    return lt_result
+    # caminho completo para a saída
+    ls_dst = os.path.join(DS_DIR_IMG, fs_dir, fs_result + ".png")
+
+    try:
+        # create a symbolic link pointing to src named dst using os.symlink() method
+        os.symlink(ls_src, ls_dst)
+
+    # em caso de erro...
+    except FileExistsError:
+        # remove previous link
+        os.remove(ls_dst)
+
+        # create a symbolic link pointing to src named dst using os.symlink() method
+        os.symlink(ls_src, ls_dst)
 
 # ---------------------------------------------------------------------------------------------
 def save2csv(flst_header: list, flst_results: list):
@@ -109,19 +146,14 @@ def main():
     """
     main
     """
-    # diretório contendo as imagens
-    DS_DIR_IMG = "data/shots/cap/SBGR-28/"
-    DS_DIR_MET = "data/metar/cap/SBGR-28/"
-
     # lista de headers
-    llst_header = ["mean_std_dev", "std_dev", "contrast",
-                   "percentage", "mean_contrast", "visibility"]
+    llst_header = ["mean_std_dev", "std_dev", "contrast", "mean_contrast"]
 
     # Lista para armazenar os resultados da função
     llst_results = []
 
     # percorre o diretório de imagens...
-    for ls_filename in os.listdir(DS_DIR_IMG):
+    for li_ndx, ls_filename in enumerate(os.listdir(DS_DIR_IMG)):
         # é um arquivo de imagem ?
         if ls_filename.endswith(".jpg") or ls_filename.endswith(".png"):
             # filename
@@ -130,24 +162,16 @@ def main():
             # caminho completo para a imagem
             ls_image_path = os.path.join(DS_DIR_IMG, ls_filename)
 
-            # carrega a imagem
-            l_image = cv2.imread(ls_image_path)
-
-            # processar a imagem e obter o resultado
-            # lt_result = process_image(l_image)
-
-            # faz detecção de nevoeiro
-            lt_result = do_analytics(l_image)
+            # processa a imagem e obtem o resultado
+            lt_result = do_analytics(ls_image_path)
 
             # caminho completo para o METAR (20230526124416Zm.txt)
-            ls_metar_path = os.path.join(DS_DIR_MET, lt_fname[0][:15] + "m.txt")
-
+            # ls_metar_path = os.path.join(DS_DIR_MET, lt_fname[0][:15] + "m.txt")
             # parse METAR
-            llst_visi = do_metar_process(ls_metar_path)
+            # llst_visi = # do_metar_process(ls_metar_path, li_ndx)
 
-            # Adicionar o resultado à lista
-            llst_results.append(lt_result + llst_visi)
-            M_LOG.debug(lt_result + llst_visi)
+            # adicionar o resultado à lista
+            llst_results.append(lt_result)  #  + llst_visi)
 
     # save results to CSV file
     save2csv(llst_header, llst_results)

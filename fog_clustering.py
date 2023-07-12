@@ -1,3 +1,10 @@
+# < imports >----------------------------------------------------------------------------------
+
+# python library
+import logging
+import os
+import sys
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -8,7 +15,18 @@ from sklearn import metrics
 from sklearn.model_selection import ParameterGrid
 from sklearn.cluster import KMeans
 
+# < constants >--------------------------------------------------------------------------------
 
+# diretório contendo as imagens
+DS_DIR_IMG = "data/shots/cap/SBGR-28/"
+
+# < logging >----------------------------------------------------------------------------------
+
+# logger
+M_LOG = logging.getLogger(__name__)
+M_LOG.setLevel(logging.DEBUG)
+
+# ---------------------------------------------------------------------------------------------
 def load_embeddings():
     """
     loading the fog dataset in pandas dataframe
@@ -32,7 +50,7 @@ def load_embeddings():
 
     return fog_raw_scaled
 
-
+# ---------------------------------------------------------------------------------------------
 def pca_embeddings(df_scaled):
     """
     To reduce the dimensions of the fog dataset we use Principal Component Analysis (PCA).
@@ -58,7 +76,7 @@ def pca_embeddings(df_scaled):
 
     return pca_2_result, pca_2
 
-
+# ---------------------------------------------------------------------------------------------
 def kmean_hyper_param_tuning(data):
     """
     Hyper parameter tuning to select the best from all the parameters on the basis of silhouette_score.
@@ -67,8 +85,7 @@ def kmean_hyper_param_tuning(data):
     :return: best number of clusters for the model (used for KMeans n_clusters)
     """
     # candidate values for our number of cluster
-    parameters = [2, 3, 4, 5, 10, 15, 20, 25, 30, 35, 40]
-    parameters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 30, 35, 40]
+    parameters = [2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30]
 
     # instantiating ParameterGrid, pass number of clusters as input
     parameter_grid = ParameterGrid({'n_clusters': parameters})
@@ -101,7 +118,7 @@ def kmean_hyper_param_tuning(data):
 
     return 5  # best_grid['n_clusters']
 
-
+# ---------------------------------------------------------------------------------------------
 def visualizing_results(pca_result, label, centroids_pca):
     """ 
     Visualizing the clusters
@@ -124,7 +141,42 @@ def visualizing_results(pca_result, label, centroids_pca):
                 color='red', edgecolors="black", lw=1.5)
     plt.show()
 
+# ---------------------------------------------------------------------------------------------
+def make_link(flst_labels: list):
+    """
+    write image
+    """
+    # index
+    li_ndx = 0
+    # percorre o diretório de imagens...
+    for ls_filename in os.listdir(DS_DIR_IMG):
+        # é um arquivo de imagem ?
+        if ls_filename.endswith(".jpg") or ls_filename.endswith(".png"):
+            # caminho completo para a imagem
+            ls_image_path = os.path.join(DS_DIR_IMG, ls_filename)
 
+            # caminho da imagem
+            ls_src = os.path.join("..", ls_filename)
+            
+            # caminho completo para a saída
+            ls_dst = os.path.join(DS_DIR_IMG, "kmeans", f'{flst_labels[li_ndx]:02d}_' + ls_filename)
+
+            # increment index
+            li_ndx += 1
+            
+            try:
+                # create a symbolic link pointing to src named dst using os.symlink() method
+                os.symlink(ls_src, ls_dst)
+
+            # em caso de erro...
+            except FileExistsError:
+                # remove previous link
+                os.remove(ls_dst)
+
+                # create a symbolic link pointing to src named dst using os.symlink() method
+                os.symlink(ls_src, ls_dst)
+
+# ---------------------------------------------------------------------------------------------
 def main():
     print("1. Loading Fog dataset\n")
     data_scaled = load_embeddings()
@@ -139,13 +191,15 @@ def main():
     # fitting KMeans
     kmeans = KMeans(n_clusters=optimum_num_clusters, n_init="auto")
     labels = kmeans.fit_predict(data_scaled)
-    print("labels:", labels)
+
     centroids = kmeans.cluster_centers_
     centroids_pca = pca_2.transform(centroids)
 
     print("\n\n4. Visualizing the data")
     visualizing_results(pca_result, kmeans.labels_, centroids_pca)
 
+    print("\n\n5. Making links")
+    make_link(labels)
 
 if __name__ == "__main__":
     main()
