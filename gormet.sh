@@ -3,7 +3,7 @@
 # language
 # export LANGUAGE=pt_BR
 
-echo ">>>>>>>>  ${USER}  <<<<<<<<<<<<<<<<"
+echo ">>>>>>>>  ${USER}  <<<<<<<<<<<<<<<"
 
 # gormet directory
 GORMET=~/Public/gormet
